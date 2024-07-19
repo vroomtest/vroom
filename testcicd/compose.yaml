@@ -1,0 +1,46 @@
+version: '3.8'  # Specify the version of the Docker Compose file format
+
+services:
+  # Jenkins service configuration
+  jenkins:
+    build: 
+      context: ./jenkins  # Path to the Jenkins Dockerfile directory
+      dockerfile: Dockerfile  # Name of the Dockerfile for Jenkins
+      args:
+        GIT_USER_NAME: "vroomtest"  # Replace with your full name
+        GIT_USER_EMAIL: "testsplunkadm@gmail.com"  # Replace with your email
+    ports:
+      - "8080:8080"  # Map host port 8080 to container port 8080 for Jenkins web interface
+      - "50000:50000"  # Map host port 50000 to container port 50000 for Jenkins agent communication
+    volumes:
+      - jenkins_home:/var/jenkins_home  # Persist Jenkins data in a Docker volume
+      - /var/run/docker.sock:/var/run/docker.sock  # Allow Jenkins to communicate with the Docker daemon
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false  # Disable Jenkins setup wizard
+
+
+
+  # SonarQube service configuration
+  sonarqube:
+    image: sonarqube:lts  # Use the Long Term Support (LTS) version of SonarQube
+    ports:
+      - "9000:9000"  # Map host port 9000 to container port 9000 for SonarQube web interface
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true  # Disable Elasticsearch bootstrap checks
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://db:5432/sonarqube  # URL for the SonarQube database
+      - SONARQUBE_JDBC_USERNAME=sonarqube  # Database username
+      - SONARQUBE_JDBC_PASSWORD=sonarqube  # Database password
+
+
+
+
+  # PostgreSQL database service configuration
+  db:
+    image: postgres:latest  # Use the latest version of PostgreSQL
+    environment:
+      POSTGRES_USER: sonarqube  # Set the PostgreSQL username
+      POSTGRES_PASSWORD: sonarqube  # Set the PostgreSQL password
+      POSTGRES_DB: sonarqube  # Set the name of the database
+
+volumes:
+  jenkins_home:  # Define a Docker volume to persist Jenkins data
