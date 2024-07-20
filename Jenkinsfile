@@ -59,6 +59,8 @@ pipeline {
         stage('UI Testing') {
             steps {
                 script {
+					// Activate env
+					source $VENV_PATH/bin/activate
                     // Start the Flask app in the background
                     sh '. $VENV_PATH/bin/activate && FLASK_APP=$FLASK_APP flask run &'
                     // Give the server a moment to start
